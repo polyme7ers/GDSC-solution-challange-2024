@@ -1,0 +1,93 @@
+mysql> CREATE TABLE student (
+    S_ID INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_name VARCHAR(50),
+    tot_cred INT
+);
+Query OK, 0 rows affected (0.30 sec)
+
+mysql> CREATE TABLE instructor (
+    T_ID INT PRIMARY KEY,
+    name VARCHAR(50),
+    dept_name VARCHAR(50),
+    salary DECIMAL(10, 2)
+);
+Query OK, 0 rows affected (0.30 sec)
+
+mysql> CREATE TABLE course (
+    course_id INT PRIMARY KEY,
+    title VARCHAR(50),
+    dept_name VARCHAR(50),
+    credits INT
+);
+Query OK, 0 rows affected (0.30 sec)
+
+
+
+
+mysql> INSERT INTO student VALUES (1, 'John Doe', 'Computer', 120);
+Query OK, 1 row affected (0.16 sec)
+
+mysql> INSERT INTO student VALUES (2, 'Amol Gupta', 'Computer', 130);
+Query OK, 1 row affected (0.08 sec)
+
+mysql> INSERT INTO student VALUES (3, 'Amit Sharma', 'Mathematics', 140);
+Query OK, 1 row affected (0.03 sec)
+
+mysql> INSERT INTO student VALUES (4, 'Ravi Singh', 'Mathematics', 110);
+Query OK, 1 row affected (0.03 sec)
+
+mysql> INSERT INTO instructor VALUES (1, 'Prof. Smith', 'Computer', 50000);
+Query OK, 1 row affected (0.16 sec)
+
+mysql> INSERT INTO instructor VALUES (2, 'Prof. Amol', 'Computer', 45000);
+Query OK, 1 row affected (0.08 sec)
+
+mysql> INSERT INTO instructor VALUES (3, 'Prof. Amit', 'Mathematics', 40000);
+Query OK, 1 row affected (0.03 sec)
+
+mysql> INSERT INTO instructor VALUES (4, 'Prof. Jane', 'Mathematics', 43000);
+Query OK, 1 row affected (0.03 sec)
+
+mysql> INSERT INTO course VALUES (1, 'DBMS', 'Computer', 3);
+Query OK, 1 row affected (0.16 sec)
+
+mysql> INSERT INTO course VALUES (2, 'Calculus', 'Mathematics', 4);
+Query OK, 1 row affected (0.08 sec)
+
+mysql> INSERT INTO course VALUES (3, 'Algorithms', 'Computer', 3);
+Query OK, 1 row affected (0.03 sec)
+
+
+
+i. Find the average salary of instructors in those departments where the average salary is more than Rs. 42000.
+mysql> SELECT AVG(salary) AS avg_salary 
+       FROM instructor 
+       WHERE dept_name IN (
+           SELECT dept_name 
+           FROM instructor 
+           GROUP BY dept_name 
+           HAVING AVG(salary) > 42000
+       );
+
+ii. Increase the salary of each instructor in the Computer department by 10%.
+mysql> UPDATE instructor 
+       SET salary = salary * 1.10 
+       WHERE dept_name = 'Computer';
+
+iii. Find the names of instructors whose names are neither ‘Amol’ nor ‘Amit’.
+mysql> SELECT name 
+       FROM instructor 
+       WHERE name NOT IN ('Amol', 'Amit');
+
+iv. Find the names of students that contain ‘am’ as a substring.
+mysql> SELECT name 
+       FROM student 
+       WHERE name LIKE '%am%';
+
+v. Find the names of students from the Computer department that take “DBMS” courses.
+mysql> SELECT s.name 
+       FROM student s 
+       JOIN course c ON s.dept_name = c.dept_name 
+       WHERE c.title = 'DBMS' AND s.dept_name = 'Computer';
+
