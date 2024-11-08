@@ -1,0 +1,75 @@
+
+-- Creating Emp table
+CREATE TABLE Emp (
+    emp_id INT PRIMARY KEY,
+    ename VARCHAR(50),
+    street VARCHAR(100),
+    city VARCHAR(50)
+);
+
+-- Creating Company table
+CREATE TABLE Company (
+    c_id INT PRIMARY KEY,
+    cname VARCHAR(50),
+    city VARCHAR(50)
+);
+
+-- Creating Works table
+CREATE TABLE Works (
+    emp_id INT,
+    c_id INT,
+    ename VARCHAR(50),
+    cname VARCHAR(50),
+    sal DECIMAL(10, 2),
+    PRIMARY KEY (emp_id, c_id),
+    FOREIGN KEY (emp_id) REFERENCES Emp(emp_id),
+    FOREIGN KEY (c_id) REFERENCES Company(c_id)
+);
+
+-- Creating Manager table
+CREATE TABLE Manager (
+    mgr_id INT PRIMARY KEY,
+    mgrname VARCHAR(50),
+    emp_id INT,
+    FOREIGN KEY (emp_id) REFERENCES Emp(emp_id)
+);
+
+
+-- Insert data into Emp table
+INSERT INTO Emp (emp_id, ename, street, city) VALUES
+(1, 'John Doe', '123 Maple St', 'New York'),
+(2, 'Jane Smith', '456 Oak St', 'Los Angeles'),
+(3, 'Sam Wilson', '789 Pine St', 'Chicago');
+
+-- Insert data into Company table
+INSERT INTO Company (c_id, cname, city) VALUES
+(1, 'ABC', 'Mumbai'),
+(2, 'Mbank', 'Delhi'),
+(3, 'Bosch', 'Pune'),
+(4, 'SBC', 'Hyderabad');
+
+-- Insert data into Works table
+INSERT INTO Works (emp_id, c_id, ename, cname, sal) VALUES
+(1, 1, 'John Doe', 'ABC', 60000),
+(2, 2, 'Jane Smith', 'Mbank', 55000),
+(3, 3, 'Sam Wilson', 'Bosch', 45000);
+
+-- Insert data into Manager table
+INSERT INTO Manager (mgr_id, mgrname, emp_id) VALUES
+(1, 'Alice', 1),
+(2, 'Bob', 2);
+
+UPDATE Company
+SET city="Pune"
+WHERE cnme="ABC"
+
+UPDATE Works
+SET sal = sal * 1.10
+WHERE cname = 'Mbank' AND emp_id IN (SELECT emp_id FROM Manager);
+
+SELECT ename
+FROM Works
+WHERE c_id IN(SELECT c_id FROM Company WHERE cname="Bosch" AND city="Pune");
+
+DELETE FROM Works
+WHERE cname = 'SBC' AND sal > 50000;
