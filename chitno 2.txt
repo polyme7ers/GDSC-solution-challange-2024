@@ -62,3 +62,40 @@ DELIMITER ;
 CALL submit_book(4, 'Book 4');
 CALL submit_book(1, 'Book 1');
 SELECT * FROM Fine;
+
+
+-- now oracle code
+declare
+rno number;
+nob varchar(20);
+doi date;
+amt number(10,2);
+nod number;
+begin
+
+rno :=&rno;
+nob :=&nob;
+select DATEOFISSUE into doi from BORROWER where ROLLNO =rno and NAMEOFBOOK=nob;
+nod :=sysdate-doi;
+if( nod >= 30) then 
+amt := nod *50;
+elsif (nod >=15 and nod < 30) then
+amt := nod *5;
+else 
+dbms_output.put_line('NO FINE');
+end if;
+
+if (nod >=15) then
+insert into FINE values (rno,sysdate,amt);
+end if;
+update BORROWER set status ='R' where ROLLNO =rno and NAMEOFBOOK=nob;
+
+exception 
+when no_data_found then
+dbms_output.put_line('no such record present');
+
+when others then
+dbms_output.put_line('ERROR');
+
+end;
+
