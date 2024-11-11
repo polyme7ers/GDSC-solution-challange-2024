@@ -2,12 +2,91 @@ use mydb
 
 db.createCollection("orderinfo")
 
-db.orderinfo.insertOne({
-  cust_id: 123,
-  cust_name: "abc",
-  status: "A",
-  price: 250
-})
+// Insert multiple documents into the orderinfo collection, including some duplicates
+db.orderinfo.insertMany([
+  { cust_id: 123, cust_name: "abc", status: "A", price: 250 },
+  { cust_id: 124, cust_name: "John Doe", status: "B", price: 260 },
+  { cust_id: 125, cust_name: "Jane Smith", status: "A", price: 300 },
+  { cust_id: 126, cust_name: "Alice Johnson", status: "C", price: 275 },
+  { cust_id: 127, cust_name: "Bob Brown", status: "A", price: 450 },
+  { cust_id: 128, cust_name: "Charlie Green", status: "B", price: 200 },
+  { cust_id: 129, cust_name: "Diana White", status: "A", price: 400 },
+  { cust_id: 130, cust_name: "Edward Black", status: "C", price: 370 },
+  { cust_id: 131, cust_name: "Fiona Blue", status: "B", price: 240 },
+  { cust_id: 132, cust_name: "George Yellow", status: "A", price: 250 },
+  // Duplicate entries
+  { cust_id: 123, cust_name: "abc", status: "A", price: 250 },
+  { cust_id: 124, cust_name: "John Doe", status: "B", price: 260 },
+  { cust_id: 125, cust_name: "Jane Smith", status: "A", price: 300 },
+  { cust_id: 132, cust_name: "George Yellow", status: "A", price: 250 }
+]);
+
+// i. Add “Age” field to all documents in the orderinfo collection
+db.orderinfo.updateMany({}, { $set: { Age: 25 } });
+
+// ii. Create a complex index on multiple fields and remove duplicates
+db.orderinfo.createIndex({ cust_id: 1, cust_name: 1, status: 1, price: 1 }, { unique: true });
+db.orderinfo.aggregate([
+  { $group: { 
+      _id: { cust_id: "$cust_id", cust_name: "$cust_name", status: "$status", price: "$price" },
+      docs: { $push: "$_id" },
+      count: { $sum: 1 }
+    }
+  },
+  { $match: { count: { $gt: 1 } } }
+]).forEach(doc => {
+  doc.docs.shift();  // Keep one document
+  db.orderinfo.deleteMany({ _id: { $in: doc.docs } });  // Remove duplicates
+});
+
+// iii. Display the average price for each customer grouped by status
+db.orderinfo.aggregate([
+  { $group: {
+      _id: "$status",
+      avgPrice: { $avg: "$price" }
+    }
+  }
+]);
+
+// iv. Change the customer’s name where status is “B”
+db.orderinfo.updateMany({ status: "B" }, { $set: { cust_name: "new_name" } });
+
+// Additional queries:
+
+// 1. Display the name of the customer having the price between 250 and 450
+db.orderinfo.find(
+  { price: { $gt: 250, $lt: 450 } },
+  { cust_name: 1, _id: 0 }
+);
+
+// 2. Increment the price by 10 for cust_id: 123 and decrement the price by 5 for cust_id: 124
+db.orderinfo.updateOne(
+  { cust_id: 123 },
+  { $inc: { price: 10 } }
+);
+
+db.orderinfo.updateOne(
+  { cust_id: 124 },
+  { $inc: { price: -5 } }
+);
+
+// 3. Remove the "status" field from the orderinfo collection
+db.orderinfo.updateMany(
+  {},
+  { $unset: { status: "" } }
+);
+
+// 4. Find the name of the customer whose status is either "A" or price is 250, or both
+db.orderinfo.find(
+  {
+    $or: [
+      { status: "A" },
+      { price: 250 }
+    ]
+  },
+  { cust_name: 1, _id: 0 }
+);
+
 
 
 // i. Add “Age” field to the orderinfo collection
