@@ -1,0 +1,61 @@
+-- Create the database
+CREATE DATABASE student;
+USE student;
+
+-- Table for storing student marks
+CREATE TABLE Stud_Marks (
+    name VARCHAR(50),
+    total_marks INT
+);
+
+-- Table for storing student results
+CREATE TABLE Result (
+    roll INT AUTO_INCREMENT PRIMARY KEY,  -- Auto-incrementing roll number
+    name VARCHAR(50),
+    class VARCHAR(20)
+);
+
+-- Insert sample data into Stud_Marks
+INSERT INTO Stud_Marks (name, total_marks)
+VALUES 
+('John Doe', 1400),
+('Jane Smith', 950),
+('Tom Harris', 860),
+('Alice Johnson', 700),
+('Bob Williams', 999);
+
+-- Define the stored function for grading
+DELIMITER $$
+
+CREATE FUNCTION proc_Grade (
+    total_marks INT
+) RETURNS VARCHAR(20)
+DETERMINISTIC  -- Indicate that the function is deterministic
+BEGIN
+    DECLARE student_class VARCHAR(20);
+    
+    -- Categorization logic
+    IF total_marks >= 990 AND total_marks <= 1500 THEN
+        SET student_class = 'Distinction';
+    ELSEIF total_marks >= 900 AND total_marks < 990 THEN
+        SET student_class = 'First Class';
+    ELSEIF total_marks >= 825 AND total_marks < 900 THEN
+        SET student_class = 'Higher Second Class';
+    ELSE
+        SET student_class = 'No Category';  -- For marks less than 825
+    END IF;
+
+    RETURN student_class;
+END$$
+
+DELIMITER ;
+
+-- Insert results into the Result table using the function
+INSERT INTO Result (name, class)
+SELECT name, proc_Grade(total_marks) AS class
+FROM Stud_Marks;
+
+-- Select results to verify the categorization
+SELECT * FROM Result;
+SELECT * FROM Stud_Marks;
+
